@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Whiteout Survival - Map Planner</title>
     <style>
         :root {
@@ -27,7 +27,6 @@
             line-height: 1.6;
             font-size: 16px;
             padding-bottom: 20px;
-            -webkit-tap-highlight-color: transparent;
         }
         .container {
             max-width: 1200px;
@@ -72,17 +71,23 @@
             color: #666;
             font-size: 0.85rem;
         }
+        
+        /* Main content layout */
         .map-planner-content {
             display: flex;
             flex-direction: column;
             gap: 15px;
         }
+        
+        /* Grid container */
         .map-planner-grid-container {
             order: 1;
             display: flex;
             flex-direction: column;
             gap: 15px;
         }
+        
+        /* Controls sidebar - moves below grid on mobile */
         .map-planner-controls {
             order: 2;
             width: 100%;
@@ -91,6 +96,7 @@
             padding: 15px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
+        
         @media (min-width: 992px) {
             .map-planner-content {
                 flex-direction: row;
@@ -103,6 +109,8 @@
                 width: 320px;
             }
         }
+        
+        /* Toolbar - simplified for mobile */
         .map-planner-toolbar {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -112,6 +120,7 @@
             border-radius: 8px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
+        
         .map-planner-toolbar-btn {
             padding: 10px;
             border: none;
@@ -132,39 +141,49 @@
             text-align: center;
             width: 100%;
         }
+        
         .map-planner-toolbar-btn i {
             font-size: 1rem;
         }
+        
         .map-planner-toolbar-btn:hover {
             background: linear-gradient(to bottom, #e9ecef, #dee2e6);
             transform: translateY(-1px);
             box-shadow: 0 2px 5px rgba(0,0,0,0.15);
         }
+        
         .map-planner-toolbar-btn:active {
             transform: translateY(0);
             box-shadow: 0 1px 2px rgba(0,0,0,0.1);
         }
+        
         .map-planner-toolbar-btn.active {
             background: linear-gradient(to right, var(--secondary-color), #f39c12);
             color: white;
             box-shadow: 0 0 0 2px rgba(241, 196, 15, 0.3);
         }
+        
         .map-planner-toolbar-btn.primary {
             background: linear-gradient(to right, #3498db, #2980b9);
             color: white;
         }
+        
         .map-planner-toolbar-btn.danger {
             background: linear-gradient(to right, #e74c3c, #c0392b);
             color: white;
         }
+        
         .map-planner-toolbar-btn.success {
             background: linear-gradient(to right, #2ecc71, #27ae60);
             color: white;
         }
+        
         .map-planner-toolbar-btn.secondary {
             background: linear-gradient(to right, #7f8c8d, #95a5a6);
             color: white;
         }
+        
+        /* Grid wrapper with touch-friendly scrolling */
         .map-planner-grid-wrapper {
             position: relative;
             overflow: auto;
@@ -176,6 +195,8 @@
             -webkit-overflow-scrolling: touch;
             touch-action: pan-x pan-y;
         }
+        
+        /* Zoom controls */
         .map-planner-zoom-controls {
             display: flex;
             gap: 8px;
@@ -185,6 +206,7 @@
             border-radius: 8px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
+        
         .map-planner-zoom-btn {
             padding: 8px 12px;
             background: linear-gradient(to bottom, #f8f9fa, #e9ecef);
@@ -199,9 +221,12 @@
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
             transition: all 0.2s;
         }
+        
         .map-planner-zoom-btn i {
             font-size: 0.9rem;
         }
+        
+        /* Grid info stats */
         .map-planner-grid-info {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
@@ -211,34 +236,42 @@
             border: 1px solid #eee;
             padding: 10px;
         }
+        
         .map-planner-grid-info-item {
             display: flex;
             flex-direction: column;
             align-items: center;
         }
+        
         .map-planner-grid-info-label {
             color: #7f8c8d;
             font-weight: normal;
             font-size: 0.75rem;
             margin-bottom: 3px;
         }
+        
         .map-planner-grid-info-value {
             font-weight: bold;
             color: var(--primary-color);
             font-size: 0.9rem;
         }
+        
+        /* Layout controls section */
         .map-planner-layout-controls {
             background-color: white;
             border-radius: 8px;
             padding: 12px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
+        
         .map-planner-layout-buttons {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
             gap: 8px;
             margin: 8px 0;
         }
+        
+        /* Selection info area */
         .map-planner-selection-info {
             padding: 12px;
             background: rgba(0, 0, 0, 0.03);
@@ -249,6 +282,8 @@
             overflow-y: auto;
             font-size: 0.85rem;
         }
+        
+        /* Notice box */
         .map-planner-notice {
             background-color: #fff3cd;
             color: #856404;
@@ -258,6 +293,8 @@
             border-left: 4px solid #ffeeba;
             margin-top: 12px;
         }
+        
+        /* The grid itself */
         .map-planner-grid {
             display: grid;
             background-color: #2c3e50;
@@ -268,6 +305,8 @@
             margin: 0;
             padding: 0;
         }
+        
+        /* Control groups */
         .map-planner-control-group {
             margin-bottom: 12px;
             background: rgba(0,0,0,0.03);
@@ -275,6 +314,7 @@
             border-radius: 8px;
             border: 1px solid #eee;
         }
+        
         .map-planner-control-group h3 {
             color: var(--primary-color);
             font-size: 1rem;
@@ -285,12 +325,16 @@
             align-items: center;
             gap: 6px;
         }
+        
         .map-planner-control-group h3 i {
             color: var(--secondary-color);
         }
+        
+        /* Form elements */
         .map-planner-form-group {
             margin-bottom: 10px;
         }
+        
         .map-planner-form-group label {
             display: block;
             margin-bottom: 5px;
@@ -298,6 +342,7 @@
             color: var(--dark-color);
             font-size: 0.85rem;
         }
+        
         .map-planner-form-group input[type="number"],
         .map-planner-form-group input[type="text"],
         .map-planner-form-group select {
@@ -309,6 +354,8 @@
             background-color: #f9f9f9;
             transition: all 0.3s;
         }
+        
+        /* Larger inputs for mobile */
         @media (max-width: 768px) {
             .map-planner-form-group input[type="number"],
             .map-planner-form-group input[type="text"],
@@ -317,6 +364,7 @@
                 font-size: 1rem;
             }
         }
+        
         .map-planner-form-group input[type="number"]:focus,
         .map-planner-form-group input[type="text"]:focus,
         .map-planner-form-group select:focus {
@@ -324,12 +372,15 @@
             border-color: var(--secondary-color);
             box-shadow: 0 0 0 3px rgba(241, 196, 15, 0.2);
         }
+        
+        /* Color options */
         .map-planner-color-options {
             display: flex;
             gap: 6px;
             margin-top: 6px;
             flex-wrap: wrap;
         }
+        
         .map-planner-color-option {
             width: 28px;
             height: 28px;
@@ -342,29 +393,36 @@
             justify-content: center;
             color: white;
         }
+        
         .map-planner-color-option.selected {
             border-color: var(--dark-color);
             transform: scale(1.1);
             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
+        
         .map-planner-color-option.selected i {
             display: block;
         }
+        
         .map-planner-color-option i {
             display: none;
             font-size: 0.8rem;
         }
+        
+        /* Custom color input */
         .map-planner-custom-color-container {
             display: flex;
             align-items: center;
             gap: 6px;
             margin-top: 6px;
         }
+        
         .map-planner-custom-color-label {
             white-space: nowrap;
             font-size: 0.85rem;
             font-weight: 600;
         }
+        
         .map-planner-custom-color-input {
             width: 60px;
             height: 28px;
@@ -373,6 +431,8 @@
             border-radius: 6px;
             cursor: pointer;
         }
+        
+        /* Multi-select info */
         .map-planner-multi-select-info {
             margin-top: 6px;
             padding: 6px;
@@ -382,6 +442,8 @@
             color: var(--dark-color);
             font-size: 0.8rem;
         }
+        
+        /* Stats panel */
         .map-planner-stats-panel {
             margin-top: 10px;
             padding: 10px;
@@ -393,22 +455,27 @@
             grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
             gap: 8px;
         }
+        
         .map-planner-stats-panel p {
             margin: 0;
             display: flex;
             flex-direction: column;
         }
+        
         .map-planner-stats-panel .label {
             color: #7f8c8d;
             font-weight: normal;
             font-size: 0.75rem;
             margin-bottom: 3px;
         }
+        
         .map-planner-stats-panel span {
             font-weight: bold;
             color: var(--primary-color);
             font-size: 0.9rem;
         }
+        
+        /* Grid cells */
         .map-planner-grid-cell {
             background-color: #34495e;
             position: relative;
@@ -417,9 +484,12 @@
             padding: 0;
             transition: background-color 0.2s;
         }
+        
         .map-planner-grid-cell.occupied {
             background-color: rgba(255, 255, 255, 0.05);
         }
+        
+        /* Grid objects */
         .map-planner-grid-object {
             position: absolute;
             display: flex;
@@ -439,11 +509,13 @@
             transition: all 0.2s;
             cursor: move;
         }
+        
         .map-planner-grid-object.placing {
             pointer-events: none;
             opacity: 0.7;
             z-index: 1;
         }
+        
         .map-planner-grid-object.selected {
             border: 2px solid var(--secondary-color);
             z-index: 3;
@@ -451,23 +523,30 @@
                         0 0 0 2px rgba(255,255,255,0.2),
                         inset 0 0 15px rgba(0,0,0,0.3);
         }
+        
         .map-planner-grid-object.dragging {
             opacity: 0.9;
             z-index: 4;
             transition: none;
         }
+        
         .map-planner-grid-object.dragging.valid {
             border-color: #27ae60;
         }
+        
         .map-planner-grid-object.dragging.invalid {
             border-color: #e74c3c;
         }
+        
+        /* Object color classes */
         .map-planner-object-blue { background: #3498db; }
         .map-planner-object-red { background: #e74c3c; }
         .map-planner-object-green { background: #2ecc71; }
         .map-planner-object-purple { background: #9b59b6; }
         .map-planner-object-orange { background: #e67e22; }
         .map-planner-object-custom { background: #3498db; }
+        
+        /* Status message styles */
         .map-planner-status {
             position: fixed;
             bottom: 20px;
@@ -484,19 +563,24 @@
             max-width: 90%;
             text-align: center;
         }
+        
         .map-planner-status.show {
             opacity: 1;
         }
+        
+        /* File input styling */
         .map-planner-file-input-wrapper {
             position: relative;
             margin-top: 8px;
         }
+        
         .map-planner-file-input {
             position: absolute;
             opacity: 0;
             width: 0.1px;
             height: 0.1px;
         }
+        
         .map-planner-file-input-label {
             display: block;
             width: 100%;
@@ -511,58 +595,70 @@
             font-size: 0.85rem;
             transition: all 0.2s;
         }
+        
         .map-planner-file-input-label:hover {
             background: linear-gradient(to bottom, #e9ecef, #dee2e6);
         }
-        .map-planner-grid-object.touch-active {
-            transform: scale(1.05);
-            box-shadow: 0 0 15px rgba(241, 196, 15, 0.6);
-            transition: transform 0.1s ease;
-        }
+        
+        /* Mobile-specific adjustments */
         @media (max-width: 768px) {
             .container {
                 padding: 8px;
             }
+            
             header {
                 padding: 12px 0;
             }
+            
             header h1 {
                 font-size: 1.3rem;
             }
+            
             .map-planner-container {
                 padding: 10px;
             }
+            
             .map-planner-toolbar {
                 grid-template-columns: repeat(2, 1fr);
             }
+            
             .map-planner-grid-wrapper {
                 height: 300px;
             }
+            
             .map-planner-zoom-controls {
                 flex-wrap: wrap;
             }
+            
             .map-planner-control-group {
                 padding: 10px;
             }
+            
             .map-planner-layout-buttons {
                 grid-template-columns: repeat(2, 1fr);
             }
+            
             .map-planner-color-options {
                 justify-content: center;
             }
         }
+        
+        /* Very small screens */
         @media (max-width: 480px) {
             .map-planner-toolbar-btn {
                 height: 50px;
                 font-size: 0.7rem;
                 padding: 6px;
             }
+            
             .map-planner-toolbar-btn i {
                 font-size: 0.9rem;
             }
+            
             .map-planner-grid-wrapper {
                 height: 250px;
             }
+            
             .map-planner-control-group h3 {
                 font-size: 0.9rem;
             }
@@ -645,7 +741,15 @@
                         </div>
                         
                         <div class="map-planner-layout-controls">
-                            
+                            <div class="map-planner-control-group">
+                                <h3><i class="fas fa-mouse-pointer"></i> Current Selection</h3>
+                                <div class="map-planner-selection-info" id="map-selection-info">
+                                    No object selected. Click on an object to select it.
+                                </div>
+                                <div class="map-planner-multi-select-info" id="map-multi-select-info" style="display: none;">
+                                    <i class="fas fa-info-circle"></i> Multi-select mode: Hold Shift to select multiple objects
+                                </div>
+                            </div>
                             
                             <div class="map-planner-control-group">
                                 <h3><i class="fas fa-border-style"></i> Grid Settings</h3>
@@ -713,15 +817,7 @@
                                 <input type="text" id="map-obj-label" placeholder="E.g. Barracks, Hospital">
                             </div>
                         </div>
-                        <div class="map-planner-control-group">
-                                <h3><i class="fas fa-mouse-pointer"></i> Current Selection</h3>
-                                <div class="map-planner-selection-info" id="map-selection-info">
-                                    No object selected. Tap on an object to select it.
-                                </div>
-                                <div class="map-planner-multi-select-info" id="map-multi-select-info" style="display: none;">
-                                    <i class="fas fa-info-circle"></i> Multi-select mode: Tap objects to add/remove from selection
-                                </div>
-                            </div>
+                        
                         <div class="map-planner-control-group">
                             <h3><i class="fas fa-save"></i> Save/Load Layout</h3>
                             <div class="map-planner-form-group">
@@ -769,6 +865,7 @@
         </section>
     </div>
 
+    <!-- Status message element -->
     <div class="map-planner-status" id="map-status-message"></div>
 
     <script>
@@ -810,7 +907,6 @@
 
             // Constants
             const CELL_SIZE = 25; // Slightly smaller for mobile
-            const LONG_PRESS_DURATION = 300; // milliseconds
             let gridCols = 26;
             let gridRows = 16;
             let objWidth = 2;
@@ -825,16 +921,11 @@
             let placingObject = null;
             let currentZoom = 1;
             let isDragging = false;
-            let isTouchDragging = false;
             let draggedObject = null;
             let dragStartRow = 0;
             let dragStartCol = 0;
             let dragRowOffset = 0;
             let dragColOffset = 0;
-            let touchStartTime = 0;
-            let touchStartX = 0;
-            let touchStartY = 0;
-            let longPressTimer = null;
 
             // Initialize
             initializeMapGrid();
@@ -971,20 +1062,15 @@
                     centerMapGrid();
                 });
 
-                // Grid interaction - mouse events
+                // Grid interaction - touch support
                 mapGrid.addEventListener('mousedown', handleMapGridMouseDown);
                 mapGrid.addEventListener('mousemove', handleMapGridMouseMove);
                 document.addEventListener('mouseup', handleMapGridMouseUp);
                 
-                // Enhanced touch events for mobile dragging
+                // Touch events for mobile
                 mapGrid.addEventListener('touchstart', handleMapGridTouchStart, { passive: false });
                 mapGrid.addEventListener('touchmove', handleMapGridTouchMove, { passive: false });
                 document.addEventListener('touchend', handleMapGridTouchEnd);
-                
-                // Prevent context menu on long press
-                mapGrid.addEventListener('contextmenu', (e) => {
-                    e.preventDefault();
-                });
 
                 // Update placing object
                 mapObjWidthInput.addEventListener('input', updateMapPlacingObject);
@@ -1088,169 +1174,13 @@
             }
             
             function handleMapGridTouchStart(e) {
-                if (e.touches.length !== 1) return;
-                e.preventDefault();
-                
-                const touch = e.touches[0];
-                touchStartTime = Date.now();
-                touchStartX = touch.clientX;
-                touchStartY = touch.clientY;
-                
-                const rect = mapGrid.getBoundingClientRect();
-                const x = (touch.clientX - rect.left) / currentZoom;
-                const y = (touch.clientY - rect.top) / currentZoom;
-                const col = Math.floor(x / CELL_SIZE);
-                const row = Math.floor(y / CELL_SIZE);
-                
-                const cell = document.elementFromPoint(touch.clientX, touch.clientY);
-                const touchedObject = cell && cell.closest('.map-planner-grid-object');
-                
-                // Start long press timer
-                if (touchedObject && !isPlacing && !isSinglePlacement) {
-                    longPressTimer = setTimeout(() => {
-                        handleLongPress(touchedObject, touch.clientX, touch.clientY);
-                    }, LONG_PRESS_DURATION);
-                }
-                
-                // For placement mode
-                if ((isPlacing || isSinglePlacement) && row >= 0 && col >= 0 && row < gridRows && col < gridCols) {
-                    if (placingObject) {
-                        placingObject.remove();
-                    }
-                    objWidth = parseInt(mapObjWidthInput.value);
-                    objHeight = parseInt(mapObjHeightInput.value);
-                    if (canPlaceMapObject(row, col, objWidth, objHeight)) {
-                        placeMapNewObject(row, col, objWidth, objHeight);
-                        if (isSinglePlacement) {
-                            isSinglePlacement = false;
-                            mapPlaceSingleBtn.classList.remove('active');
-                            if (placingObject) {
-                                placingObject.remove();
-                                placingObject = null;
-                            }
-                        } else if (isPlacing) {
-                            createMapPlacingObject();
-                        }
-                    } else if (isPlacing) {
-                        createMapPlacingObject();
-                    }
-                }
-            }
-
-            function handleLongPress(object, clientX, clientY) {
-                isTouchDragging = true;
-                clearMapSelection();
-                selectMapObject(object);
-                
-                if (selectedObjects.length === 1 && !isMultiSelect) {
-                    draggedObject = object;
-                    const objData = objects.find(obj => obj.element === draggedObject);
-                    
-                    if (objData) {
-                        // Calculate the offset within the object where the user touched
-                        const rect = draggedObject.getBoundingClientRect();
-                        const x = (clientX - rect.left) / currentZoom;
-                        const y = (clientY - rect.top) / currentZoom;
-                        
-                        // Calculate which cell within the object was touched
-                        dragColOffset = Math.floor(x / CELL_SIZE);
-                        dragRowOffset = Math.floor(y / CELL_SIZE);
-                        
-                        // Store the original position
-                        dragStartRow = objData.row;
-                        dragStartCol = objData.col;
-                        
-                        draggedObject.classList.add('dragging', 'touch-active');
-                    }
-                }
-            }
-
-            function handleMapGridMouseMove(e) {
-                e.preventDefault();
-                handleMapGridMove(e.clientX, e.clientY);
-            }
-            
-            function handleMapGridTouchMove(e) {
-                if (!isTouchDragging || e.touches.length !== 1) return;
-                e.preventDefault();
-                
-                const touch = e.touches[0];
-                
-                // Cancel long press if finger moved too much
-                const dx = Math.abs(touch.clientX - touchStartX);
-                const dy = Math.abs(touch.clientY - touchStartY);
-                if (dx > 10 || dy > 10) {
-                    clearTimeout(longPressTimer);
-                    longPressTimer = null;
-                }
-                
-                if (isTouchDragging && draggedObject) {
-                    const rect = mapGrid.getBoundingClientRect();
-                    const x = (touch.clientX - rect.left) / currentZoom;
-                    const y = (touch.clientY - rect.top) / currentZoom;
-                    
-                    const col = Math.floor(x / CELL_SIZE) - dragColOffset;
-                    const row = Math.floor(y / CELL_SIZE) - dragRowOffset;
-                    
-                    const objData = objects.find(obj => obj.element === draggedObject);
-                    if (objData) {
-                        const { width, height } = objData;
-                        const maxLeft = (gridCols - width) * CELL_SIZE;
-                        const maxTop = (gridRows - height) * CELL_SIZE;
-                        const left = Math.min(Math.max(col * CELL_SIZE, 0), maxLeft);
-                        const top = Math.min(Math.max(row * CELL_SIZE, 0), maxTop);
-                        
-                        draggedObject.style.left = `${left}px`;
-                        draggedObject.style.top = `${top}px`;
-                        
-                        const isValid = canPlaceMapObject(row, col, width, height, draggedObject);
-                        draggedObject.classList.toggle('valid', isValid);
-                        draggedObject.classList.toggle('invalid', !isValid);
-                    }
-                }
-            }
-
-            function handleMapGridMouseUp(e) {
-                e.preventDefault();
-                handleMapGridEnd();
-            }
-            
-            function handleMapGridTouchEnd(e) {
-                clearTimeout(longPressTimer);
-                longPressTimer = null;
-                
-                if (isTouchDragging && draggedObject) {
+                if (e.touches.length === 1) {
                     e.preventDefault();
-                    isTouchDragging = false;
-                    const objData = objects.find(obj => obj.element === draggedObject);
-                    if (objData) {
-                        const isValid = canPlaceMapObject(
-                            Math.floor(parseInt(draggedObject.style.top) / CELL_SIZE), 
-                            Math.floor(parseInt(draggedObject.style.left) / CELL_SIZE), 
-                            objData.width, 
-                            objData.height, 
-                            draggedObject
-                        );
-                        
-                        draggedObject.classList.remove('dragging', 'valid', 'invalid', 'touch-active');
-                        
-                        if (isValid) {
-                            objData.row = Math.floor(parseInt(draggedObject.style.top) / CELL_SIZE);
-                            objData.col = Math.floor(parseInt(draggedObject.style.left) / CELL_SIZE);
-                            positionMapObject(draggedObject, objData.row, objData.col, objData.width, objData.height);
-                            updateMapOccupiedCells();
-                            updateMapSelectionInfo();
-                            updateMapStats();
-                        } else {
-                            positionMapObject(draggedObject, dragStartRow, dragStartCol, objData.width, objData.height);
-                        }
-                    }
-                    draggedObject = null;
-                    dragRowOffset = 0;
-                    dragColOffset = 0;
+                    const touch = e.touches[0];
+                    handleMapGridInteraction(touch.clientX, touch.clientY, false);
                 }
             }
-
+            
             function handleMapGridInteraction(clientX, clientY, isShiftKey) {
                 const rect = mapGrid.getBoundingClientRect();
                 const x = (clientX - rect.left) / currentZoom;
@@ -1321,6 +1251,19 @@
                 }
             }
 
+            function handleMapGridMouseMove(e) {
+                e.preventDefault();
+                handleMapGridMove(e.clientX, e.clientY);
+            }
+            
+            function handleMapGridTouchMove(e) {
+                if (e.touches.length === 1) {
+                    e.preventDefault();
+                    const touch = e.touches[0];
+                    handleMapGridMove(touch.clientX, touch.clientY);
+                }
+            }
+            
             function handleMapGridMove(clientX, clientY) {
                 if (isPlacing || isSinglePlacement) {
                     if (!placingObject) return;
@@ -1340,7 +1283,7 @@
                     return;
                 }
                 
-                if ((isDragging || isTouchDragging) && draggedObject) {
+                if (isDragging && draggedObject) {
                     const rect = mapGrid.getBoundingClientRect();
                     // Account for zoom when calculating position
                     const x = (clientX - rect.left) / currentZoom;
@@ -1368,10 +1311,19 @@
                 }
             }
 
+            function handleMapGridMouseUp(e) {
+                e.preventDefault();
+                handleMapGridEnd();
+            }
+            
+            function handleMapGridTouchEnd(e) {
+                e.preventDefault();
+                handleMapGridEnd();
+            }
+            
             function handleMapGridEnd() {
-                if ((isDragging || isTouchDragging) && draggedObject) {
+                if (isDragging && draggedObject) {
                     isDragging = false;
-                    isTouchDragging = false;
                     const objData = objects.find(obj => obj.element === draggedObject);
                     if (objData) {
                         const isValid = canPlaceMapObject(
@@ -1382,7 +1334,7 @@
                             draggedObject
                         );
                         
-                        draggedObject.classList.remove('dragging', 'valid', 'invalid', 'touch-active');
+                        draggedObject.classList.remove('dragging', 'valid', 'invalid');
                         
                         if (isValid) {
                             objData.row = Math.floor(parseInt(draggedObject.style.top) / CELL_SIZE);
