@@ -1,0 +1,1583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Whiteout Survival - Map Planner</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #f1c40f;
+            --accent-color: #e74c3c;
+            --light-color: #ecf0f1;
+            --dark-color: #1a2a3a;
+            --success-color: #27ae60;
+            --info-color: #3498db;
+        }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+            font-size: 16px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        header h1 {
+            font-size: 2rem;
+            margin-bottom: 5px;
+        }
+        header p {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        .map-planner-container {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .map-planner-header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--secondary-color);
+        }
+        .map-planner-header h2 {
+            color: var(--primary-color);
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+        .map-planner-header p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        .map-planner-content {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        @media (min-width: 992px) {
+            .map-planner-content {
+                flex-direction: row;
+            }
+        }
+        .map-planner-grid-container {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .map-planner-toolbar {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 10px;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        @media (max-width: 768px) {
+            .map-planner-toolbar {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        .map-planner-toolbar-btn {
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            background: linear-gradient(to bottom, #f8f9fa, #e9ecef);
+            color: var(--dark-color);
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.85rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            transition: all 0.2s;
+            height: 60px;
+            text-align: center;
+            width: 100%;
+        }
+        @media (max-width: 768px) {
+            .map-planner-toolbar-btn {
+                min-width: 0;
+            }
+        }
+        .map-planner-toolbar-btn i {
+            font-size: 1rem;
+        }
+        .map-planner-toolbar-btn:hover {
+            background: linear-gradient(to bottom, #e9ecef, #dee2e6);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+        }
+        .map-planner-toolbar-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+        .map-planner-toolbar-btn.active {
+            background: linear-gradient(to right, var(--secondary-color), #f39c12);
+            color: white;
+            box-shadow: 0 0 0 2px rgba(241, 196, 15, 0.3);
+        }
+        .map-planner-toolbar-btn.primary {
+            background: linear-gradient(to right, #3498db, #2980b9);
+            color: white;
+        }
+        .map-planner-toolbar-btn.danger {
+            background: linear-gradient(to right, #e74c3c, #c0392b);
+            color: white;
+        }
+        .map-planner-toolbar-btn.success {
+            background: linear-gradient(to right, #2ecc71, #27ae60);
+            color: white;
+        }
+        .map-planner-toolbar-btn.secondary {
+            background: linear-gradient(to right, #7f8c8d, #95a5a6);
+            color: white;
+        }
+        .map-planner-grid-wrapper {
+            position: relative;
+            overflow: auto;
+            border: 2px solid #34495e;
+            border-radius: 8px;
+            background-color: #2c3e50;
+            height: 400px;
+            width: 100%;
+            -webkit-overflow-scrolling: touch;
+        }
+        .map-planner-zoom-controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .map-planner-zoom-btn {
+            padding: 10px 16px;
+            background: linear-gradient(to bottom, #f8f9fa, #e9ecef);
+            border: 1px solid #ddd;
+            color: var(--dark-color);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            transition: all 0.2s;
+        }
+        .map-planner-zoom-btn:hover {
+            background: linear-gradient(to bottom, #e9ecef, #dee2e6);
+        }
+        .map-planner-zoom-btn i {
+            font-size: 0.9rem;
+        }
+        .map-planner-grid-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            background: rgba(0, 0, 0, 0.03);
+            border-radius: 8px;
+            border: 1px solid #eee;
+            padding: 15px;
+        }
+        .map-planner-grid-info-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .map-planner-grid-info-label {
+            color: #7f8c8d;
+            font-weight: normal;
+            font-size: 0.8rem;
+            margin-bottom: 3px;
+        }
+        .map-planner-grid-info-value {
+            font-weight: bold;
+            color: var(--primary-color);
+            font-size: 1rem;
+        }
+        .map-planner-layout-controls {
+            background-color: white;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .map-planner-layout-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            margin: 10px 0;
+        }
+        .map-planner-selection-info {
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.03);
+            border-radius: 8px;
+            border: 1px solid #eee;
+            min-height: 120px;
+            max-height: 120px;
+            overflow-y: auto;
+            font-size: 0.9rem;
+        }
+        .map-planner-notice {
+            background-color: #fff3cd;
+            color: #856404;
+            padding: 10px 15px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            border-left: 4px solid #ffeeba;
+            margin-top: 15px;
+        }
+        .map-planner-controls {
+            width: 100%;
+            background-color: white;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            flex: 0 0 320px;
+        }
+        @media (min-width: 992px) {
+            .map-planner-controls {
+                width: 320px;
+            }
+        }
+        .map-planner-grid {
+            display: grid;
+            background-color: #2c3e50;
+            position: relative;
+            transform-origin: 0 0;
+            transition: transform 0.2s ease;
+            --cell-size: 25px;
+            margin: 0;
+            padding: 0;
+        }
+        .map-planner-control-group {
+            margin-bottom: 15px;
+            background: rgba(0,0,0,0.03);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #eee;
+        }
+        .map-planner-control-group h3 {
+            color: var(--primary-color);
+            font-size: 1.1rem;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .map-planner-control-group h3 i {
+            color: var(--secondary-color);
+        }
+        .map-planner-form-group {
+            margin-bottom: 12px;
+        }
+        .map-planner-form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: var(--dark-color);
+            font-size: 0.9rem;
+        }
+        .map-planner-form-group input[type="number"],
+        .map-planner-form-group input[type="text"],
+        .map-planner-form-group select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            background-color: #f9f9f9;
+            transition: all 0.3s;
+        }
+        .map-planner-form-group input[type="number"]:focus,
+        .map-planner-form-group input[type="text"]:focus,
+        .map-planner-form-group select:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 3px rgba(241, 196, 15, 0.2);
+        }
+        .map-planner-color-options {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+            flex-wrap: wrap;
+        }
+        .map-planner-color-option {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+        .map-planner-color-option.selected {
+            border-color: var(--dark-color);
+            transform: scale(1.1);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .map-planner-color-option.selected i {
+            display: block;
+        }
+        .map-planner-color-option i {
+            display: none;
+            font-size: 0.8rem;
+        }
+        .map-planner-custom-color-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        .map-planner-custom-color-label {
+            white-space: nowrap;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+        .map-planner-custom-color-input {
+            width: 60px;
+            height: 28px;
+            padding: 0;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        .map-planner-multi-select-info {
+            margin-top: 8px;
+            padding: 8px;
+            background-color: #fff8e1;
+            border-left: 3px solid var(--secondary-color);
+            border-radius: 4px;
+            color: var(--dark-color);
+            font-size: 0.85rem;
+        }
+        .map-planner-stats-panel {
+            margin-top: 12px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.03);
+            border-radius: 8px;
+            border: 1px solid #eee;
+            font-size: 0.9rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+        }
+        .map-planner-stats-panel p {
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+        }
+        .map-planner-stats-panel .label {
+            color: #7f8c8d;
+            font-weight: normal;
+            font-size: 0.8rem;
+            margin-bottom: 3px;
+        }
+        .map-planner-stats-panel span {
+            font-weight: bold;
+            color: var(--primary-color);
+            font-size: 1rem;
+        }
+        .map-planner-grid-cell {
+            background-color: #34495e;
+            position: relative;
+            border: 1px solid rgba(255,255,255,0.1);
+            margin: 0;
+            padding: 0;
+            transition: background-color 0.2s;
+        }
+        .map-planner-grid-cell.occupied {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        .map-planner-grid-object {
+            position: absolute;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            user-select: none;
+            border: 1px solid rgba(255,255,255,0.3);
+            z-index: 2;
+            box-shadow: 0 0 0 1px rgba(0,0,0,0.3), 
+                        0 0 0 2px rgba(255,255,255,0.1),
+                        inset 0 0 10px rgba(0,0,0,0.2);
+            margin: 0;
+            padding: 0;
+            font-size: 0.8rem;
+            transition: all 0.2s;
+            cursor: move;
+        }
+        .map-planner-grid-object.placing {
+            pointer-events: none;
+            opacity: 0.7;
+            z-index: 1;
+        }
+        .map-planner-grid-object.selected {
+            border: 2px solid var(--secondary-color);
+            z-index: 3;
+            box-shadow: 0 0 0 1px rgba(0,0,0,0.5), 
+                        0 0 0 2px rgba(255,255,255,0.2),
+                        inset 0 0 15px rgba(0,0,0,0.3);
+        }
+        .map-planner-grid-object.dragging {
+            opacity: 0.9;
+            z-index: 4;
+            transition: none;
+        }
+        .map-planner-grid-object.dragging.valid {
+            border-color: #27ae60;
+        }
+        .map-planner-grid-object.dragging.invalid {
+            border-color: #e74c3c;
+        }
+        .map-planner-object-blue { background: #3498db; }
+        .map-planner-object-red { background: #e74c3c; }
+        .map-planner-object-green { background: #2ecc71; }
+        .map-planner-object-purple { background: #9b59b6; }
+        .map-planner-object-orange { background: #e67e22; }
+        .map-planner-object-custom { background: #3498db; }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Whiteout Survival Planner</h1>
+            <p>Base Map Planner - Design and optimize your base layout</p>
+        </header>
+        
+        <section id="map-planner" class="calculator-section active">
+            <div class="map-planner-container">
+                <div class="map-planner-header">
+                    <h2><i class="fas fa-map-marked-alt"></i> Base Map Planner</h2>
+                    <p>Design and optimize your base layout before building in-game</p>
+                </div>
+                
+                <div class="map-planner-content">
+                    <div class="map-planner-grid-container">
+                        <div class="map-planner-toolbar">
+                            <button class="map-planner-toolbar-btn" id="map-place-btn">
+                                <i class="fas fa-plus-circle"></i>
+                                <span>Place</span>
+                            </button>
+                            <button class="map-planner-toolbar-btn" id="map-place-single-btn">
+                                <i class="fas fa-plus-square"></i>
+                                <span>Single</span>
+                            </button>
+                            <button class="map-planner-toolbar-btn danger" id="map-delete-btn">
+                                <i class="fas fa-trash-alt"></i>
+                                <span>Delete</span>
+                            </button>
+                            <button class="map-planner-toolbar-btn secondary" id="map-clear-btn">
+                                <i class="fas fa-broom"></i>
+                                <span>Clear</span>
+                            </button>
+                            <button class="map-planner-toolbar-btn success" id="map-download-btn">
+                                <i class="fas fa-download"></i>
+                                <span>Export</span>
+                            </button>
+                            <button class="map-planner-toolbar-btn secondary" id="map-multi-select-btn">
+                                <i class="fas fa-object-group"></i>
+                                <span>Multi-Select</span>
+                            </button>
+                        </div>
+                        
+                        <div class="map-planner-grid-wrapper" id="map-grid-wrapper">
+                            <div class="map-planner-grid" id="map-grid"></div>
+                        </div>
+                        
+                        <div class="map-planner-zoom-controls">
+                            <button class="map-planner-zoom-btn" id="map-zoom-in-btn">
+                                <i class="fas fa-search-plus"></i> Zoom In
+                            </button>
+                            <button class="map-planner-zoom-btn" id="map-zoom-out-btn">
+                                <i class="fas fa-search-minus"></i> Zoom Out
+                            </button>
+                            <button class="map-planner-zoom-btn" id="map-zoom-reset-btn">
+                                <i class="fas fa-search"></i> Reset
+                            </button>
+                        </div>
+                        
+                        <div class="map-planner-grid-info">
+                            <div class="map-planner-grid-info-item">
+                                <span class="map-planner-grid-info-label">Total Objects</span>
+                                <span class="map-planner-grid-info-value" id="map-total-objects">0</span>
+                            </div>
+                            <div class="map-planner-grid-info-item">
+                                <span class="map-planner-grid-info-label">Grid Size</span>
+                                <span class="map-planner-grid-info-value" id="map-grid-size">26×16</span>
+                            </div>
+                            <div class="map-planner-grid-info-item">
+                                <span class="map-planner-grid-info-label">Utilization</span>
+                                <span class="map-planner-grid-info-value" id="map-grid-utilization">0%</span>
+                            </div>
+                        </div>
+                        
+                        <div class="map-planner-layout-controls">
+                            <div class="map-planner-control-group">
+                                <h3><i class="fas fa-save"></i> Save/Load Layout</h3>
+                                <div class="map-planner-form-group">
+                                    <label for="map-layout-name"><i class="fas fa-file-signature"></i> Layout Name</label>
+                                    <input type="text" id="map-layout-name" placeholder="Enter layout name">
+                                </div>
+                                <div class="map-planner-form-group">
+                                    <label for="map-load-layout"><i class="fas fa-folder-open"></i> Load Layout</label>
+                                    <select id="map-load-layout">
+                                        <option value="">Select a saved layout</option>
+                                    </select>
+                                </div>
+                                <div class="map-planner-layout-buttons">
+                                    <button class="map-planner-toolbar-btn primary" id="map-save-layout-btn">
+                                        <i class="fas fa-save"></i> Save
+                                    </button>
+                                    <button class="map-planner-toolbar-btn" id="map-load-layout-btn">
+                                        <i class="fas fa-folder-open"></i> Load
+                                    </button>
+                                    <button class="map-planner-toolbar-btn danger" id="map-delete-layout-btn">
+                                        <i class="fas fa-trash-alt"></i> Delete
+                                    </button>
+                                </div>
+                                <div class="map-planner-form-group">
+                                    <label for="map-import-layouts"><i class="fas fa-file-import"></i> Import Layouts</label>
+                                    <input type="file" id="map-import-layouts" accept=".json">
+                                </div>
+                                <div class="map-planner-layout-buttons">
+                                    <button class="map-planner-toolbar-btn success" id="map-export-layouts-btn">
+                                        <i class="fas fa-file-export"></i> Export
+                                    </button>
+                                    <button class="map-planner-toolbar-btn" id="map-import-layouts-btn">
+                                        <i class="fas fa-file-import"></i> Import
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="map-planner-notice">
+                            <i class="fas fa-info-circle"></i> For best experience, use desktop view and enable multi-touch gestures on mobile devices.
+                        </div>
+                    </div>
+                    
+                    <div class="map-planner-controls">
+                        <div class="map-planner-control-group">
+                            <h3><i class="fas fa-mouse-pointer"></i> Current Selection</h3>
+                            <div class="map-planner-selection-info" id="map-selection-info">
+                                No object selected. Click on an object to select it.
+                            </div>
+                            <div class="map-planner-multi-select-info" id="map-multi-select-info" style="display: none;">
+                                <i class="fas fa-info-circle"></i> Multi-select mode: Hold Shift to select multiple objects
+                            </div>
+                        </div>
+                        
+                        <div class="map-planner-control-group">
+                            <h3><i class="fas fa-cube"></i> Object Settings</h3>
+                            <div class="map-planner-form-group">
+                                <label for="map-obj-width"><i class="fas fa-arrows-alt-h"></i> Width (cells)</label>
+                                <input type="number" id="map-obj-width" min="1" max="1000" value="2">
+                            </div>
+                            <div class="map-planner-form-group">
+                                <label for="map-obj-height"><i class="fas fa-arrows-alt-v"></i> Height (cells)</label>
+                                <input type="number" id="map-obj-height" min="1" max="1000" value="2">
+                            </div>
+                            <div class="map-planner-form-group">
+                                <label><i class="fas fa-palette"></i> Color</label>
+                                <div class="map-planner-color-options">
+                                    <div class="map-planner-color-option selected" style="background: #3498db;" data-color="blue">
+                                        <i class="fas fa-check"></i>
+                                    </div>
+                                    <div class="map-planner-color-option" style="background: #e74c3c;" data-color="red">
+                                        <i class="fas fa-check"></i>
+                                    </div>
+                                    <div class="map-planner-color-option" style="background: #2ecc71;" data-color="green">
+                                        <i class="fas fa-check"></i>
+                                    </div>
+                                    <div class="map-planner-color-option" style="background: #9b59b6;" data-color="purple">
+                                        <i class="fas fa-check"></i>
+                                    </div>
+                                    <div class="map-planner-color-option" style="background: #e67e22;" data-color="orange">
+                                        <i class="fas fa-check"></i>
+                                    </div>
+                                </div>
+                                <div class="map-planner-custom-color-container">
+                                    <span class="map-planner-custom-color-label">Custom:</span>
+                                    <div class="map-planner-color-option" style="background: #3498db;" data-color="custom">
+                                        <i class="fas fa-check"></i>
+                                    </div>
+                                    <input type="color" class="map-planner-custom-color-input" id="map-custom-color-input" value="#3498db">
+                                </div>
+                            </div>
+                            <div class="map-planner-form-group">
+                                <label for="map-obj-label"><i class="fas fa-tag"></i> Label (optional)</label>
+                                <input type="text" id="map-obj-label" placeholder="E.g. Barracks, Hospital">
+                            </div>
+                        </div>
+                        
+                        <div class="map-planner-control-group">
+                            <h3><i class="fas fa-border-style"></i> Grid Settings</h3>
+                            <div class="map-planner-form-group">
+                                <label for="map-grid-cols"><i class="fas fa-columns"></i> Columns</label>
+                                <input type="number" id="map-grid-cols" min="15" max="1000" value="26">
+                            </div>
+                            <div class="map-planner-form-group">
+                                <label for="map-grid-rows"><i class="fas fa-stream"></i> Rows</label>
+                                <input type="number" id="map-grid-rows" min="15" max="1000" value="16">
+                            </div>
+                            <div class="map-planner-layout-buttons">
+                                <button class="map-planner-toolbar-btn primary" id="map-update-grid-btn">
+                                    <i class="fas fa-sync-alt"></i> Update Grid
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize elements
+            const mapGridWrapper = document.getElementById('map-grid-wrapper');
+            const mapGrid = document.getElementById('map-grid');
+            const mapGridColsInput = document.getElementById('map-grid-cols');
+            const mapGridRowsInput = document.getElementById('map-grid-rows');
+            const mapUpdateGridBtn = document.getElementById('map-update-grid-btn');
+            const mapObjWidthInput = document.getElementById('map-obj-width');
+            const mapObjHeightInput = document.getElementById('map-obj-height');
+            const mapObjLabelInput = document.getElementById('map-obj-label');
+            const mapPlaceBtn = document.getElementById('map-place-btn');
+            const mapPlaceSingleBtn = document.getElementById('map-place-single-btn');
+            const mapDeleteBtn = document.getElementById('map-delete-btn');
+            const mapClearBtn = document.getElementById('map-clear-btn');
+            const mapDownloadBtn = document.getElementById('map-download-btn');
+            const mapMultiSelectBtn = document.getElementById('map-multi-select-btn');
+            const mapColorOptions = document.querySelectorAll('.map-planner-color-option');
+            const mapCustomColorInput = document.getElementById('map-custom-color-input');
+            const mapSelectionInfo = document.getElementById('map-selection-info');
+            const mapMultiSelectInfo = document.getElementById('map-multi-select-info');
+            const mapZoomInBtn = document.getElementById('map-zoom-in-btn');
+            const mapZoomOutBtn = document.getElementById('map-zoom-out-btn');
+            const mapZoomResetBtn = document.getElementById('map-zoom-reset-btn');
+            const mapTotalObjectsSpan = document.getElementById('map-total-objects');
+            const mapGridSizeSpan = document.getElementById('map-grid-size');
+            const mapGridUtilizationSpan = document.getElementById('map-grid-utilization');
+            const mapLayoutNameInput = document.getElementById('map-layout-name');
+            const mapLoadLayoutSelect = document.getElementById('map-load-layout');
+            const mapSaveLayoutBtn = document.getElementById('map-save-layout-btn');
+            const mapLoadLayoutBtn = document.getElementById('map-load-layout-btn');
+            const mapDeleteLayoutBtn = document.getElementById('map-delete-layout-btn');
+            const mapExportLayoutsBtn = document.getElementById('map-export-layouts-btn');
+            const mapImportLayoutsInput = document.getElementById('map-import-layouts');
+            const mapImportLayoutsBtn = document.getElementById('map-import-layouts-btn');
+
+            // Constants
+            const CELL_SIZE = 30;
+            let gridCols = 26;
+            let gridRows = 16;
+            let objWidth = 2;
+            let objHeight = 2;
+            let selectedColor = 'blue';
+            let customColor = '#3498db';
+            let objects = [];
+            let selectedObjects = [];
+            let isPlacing = false;
+            let isSinglePlacement = false;
+            let isMultiSelect = false;
+            let placingObject = null;
+            let currentZoom = 1;
+            let isDragging = false;
+            let draggedObject = null;
+            let dragStartRow = 0;
+            let dragStartCol = 0;
+            let dragRowOffset = 0;
+            let dragColOffset = 0;
+
+            // Initialize
+            initializeMapGrid();
+            setupMapEventListeners();
+            updateSavedLayouts();
+
+            function initializeMapGrid() {
+                gridCols = parseInt(mapGridColsInput.value);
+                gridRows = parseInt(mapGridRowsInput.value);
+
+                mapGrid.style.gridTemplateColumns = `repeat(${gridCols}, ${CELL_SIZE}px)`;
+                mapGrid.style.gridTemplateRows = `repeat(${gridRows}, ${CELL_SIZE}px)`;
+                mapGrid.style.width = `${gridCols * CELL_SIZE}px`;
+                mapGrid.style.height = `${gridRows * CELL_SIZE}px`;
+
+                mapGridSizeSpan.textContent = `${gridCols}×${gridRows}`;
+                currentZoom = 1;
+                mapGrid.style.transform = `scale(${currentZoom})`;
+
+                mapGrid.innerHTML = '';
+                for (let i = 0; i < gridRows; i++) {
+                    for (let j = 0; j < gridCols; j++) {
+                        const cell = document.createElement('div');
+                        cell.classList.add('map-planner-grid-cell');
+                        cell.dataset.row = i;
+                        cell.dataset.col = j;
+                        cell.style.margin = '0';
+                        cell.style.padding = '0';
+                        mapGrid.appendChild(cell);
+                    }
+                }
+                mapGridWrapper.scrollTo(0, 0);
+                centerMapGrid();
+                updateMapStats();
+            }
+
+            function centerMapGrid() {
+                mapGridWrapper.scrollTo(
+                    (gridCols * CELL_SIZE * currentZoom - mapGridWrapper.clientWidth) / 2,
+                    (gridRows * CELL_SIZE * currentZoom - mapGridWrapper.clientHeight) / 2
+                );
+            }
+
+            function setupMapEventListeners() {
+                // Grid configuration
+                mapUpdateGridBtn.addEventListener('click', () => {
+                    initializeMapGrid();
+                    objects = [];
+                    selectedObjects = [];
+                    updateMapSelectionInfo();
+                    updateMapStats();
+                });
+
+                // Object placement mode
+                mapPlaceBtn.addEventListener('click', toggleMapPlacementMode);
+                mapPlaceSingleBtn.addEventListener('click', toggleMapSinglePlacementMode);
+
+                // Multi-select mode
+                mapMultiSelectBtn.addEventListener('click', () => {
+                    isMultiSelect = !isMultiSelect;
+                    mapMultiSelectBtn.classList.toggle('active', isMultiSelect);
+                    mapMultiSelectInfo.style.display = isMultiSelect ? 'block' : 'none';
+                    if (!isMultiSelect && selectedObjects.length > 1) {
+                        clearMapSelection();
+                    }
+                });
+
+                // Color selection
+                mapColorOptions.forEach(option => {
+                    option.addEventListener('click', () => {
+                        mapColorOptions.forEach(opt => opt.classList.remove('selected'));
+                        option.classList.add('selected');
+                        selectedColor = option.dataset.color;
+                        if (selectedColor === 'custom') {
+                            const customOption = document.querySelector('.map-planner-color-option[data-color="custom"]');
+                            customOption.style.backgroundColor = customColor;
+                        }
+                        if (placingObject) {
+                            updateMapPlacingObjectColor();
+                        }
+                        if (selectedObjects.length > 0) {
+                            updateMapSelectedObjectsColor();
+                        }
+                    });
+                });
+
+                // Custom color input
+                mapCustomColorInput.addEventListener('input', (e) => {
+                    customColor = e.target.value;
+                    if (selectedColor === 'custom') {
+                        const customOption = document.querySelector('.map-planner-color-option[data-color="custom"]');
+                        customOption.style.backgroundColor = customColor;
+                        if (placingObject) {
+                            updateMapPlacingObjectColor();
+                        }
+                        if (selectedObjects.length > 0) {
+                            updateMapSelectedObjectsColor();
+                        }
+                    }
+                });
+
+                // Object deletion
+                mapDeleteBtn.addEventListener('click', deleteMapSelectedObjects);
+
+                // Clear all objects
+                mapClearBtn.addEventListener('click', () => {
+                    objects.forEach(obj => obj.element.remove());
+                    objects = [];
+                    selectedObjects = [];
+                    updateMapSelectionInfo();
+                    updateMapOccupiedCells();
+                    updateMapStats();
+                });
+
+                // Download grid
+                mapDownloadBtn.addEventListener('click', downloadMapFullGrid);
+
+                // Zoom controls
+                mapZoomInBtn.addEventListener('click', () => {
+                    currentZoom = Math.min(currentZoom + 0.1, 2);
+                    mapGrid.style.transform = `scale(${currentZoom})`;
+                    centerMapGrid();
+                });
+
+                mapZoomOutBtn.addEventListener('click', () => {
+                    currentZoom = Math.max(currentZoom - 0.1, 0.5);
+                    mapGrid.style.transform = `scale(${currentZoom})`;
+                    centerMapGrid();
+                });
+
+                mapZoomResetBtn.addEventListener('click', () => {
+                    currentZoom = 1;
+                    mapGrid.style.transform = `scale(${currentZoom})`;
+                    centerMapGrid();
+                });
+
+                // Grid interaction
+                mapGrid.addEventListener('mousedown', handleMapGridMouseDown);
+                mapGrid.addEventListener('mousemove', handleMapGridMouseMove);
+                document.addEventListener('mouseup', handleMapGridMouseUp);
+
+                // Update placing object
+                mapObjWidthInput.addEventListener('input', updateMapPlacingObject);
+                mapObjHeightInput.addEventListener('input', updateMapPlacingObject);
+                mapObjLabelInput.addEventListener('input', updateMapPlacingObject);
+
+                // Save/Load/Delete layout
+                mapSaveLayoutBtn.addEventListener('click', saveLayout);
+                mapLoadLayoutBtn.addEventListener('click', loadLayout);
+                mapDeleteLayoutBtn.addEventListener('click', deleteLayout);
+
+                // Export/Import layouts
+                mapExportLayoutsBtn.addEventListener('click', exportLayouts);
+                mapImportLayoutsBtn.addEventListener('click', importLayouts);
+            }
+
+            function toggleMapPlacementMode() {
+                if (isPlacing) {
+                    isPlacing = false;
+                    mapPlaceBtn.classList.remove('active');
+                    if (placingObject) {
+                        placingObject.remove();
+                        placingObject = null;
+                    }
+                    return;
+                }
+                if (isSinglePlacement) {
+                    isSinglePlacement = false;
+                    mapPlaceSingleBtn.classList.remove('active');
+                }
+                isPlacing = true;
+                mapPlaceBtn.classList.add('active');
+                createMapPlacingObject();
+            }
+
+            function toggleMapSinglePlacementMode() {
+                if (isSinglePlacement) {
+                    isSinglePlacement = false;
+                    mapPlaceSingleBtn.classList.remove('active');
+                    if (placingObject) {
+                        placingObject.remove();
+                        placingObject = null;
+                    }
+                    return;
+                }
+                if (isPlacing) {
+                    isPlacing = false;
+                    mapPlaceBtn.classList.remove('active');
+                }
+                isSinglePlacement = true;
+                mapPlaceSingleBtn.classList.add('active');
+                createMapPlacingObject();
+            }
+
+            function updateMapPlacingObjectColor() {
+                if (!placingObject) return;
+                placingObject.className = 'map-planner-grid-object placing';
+                placingObject.style.backgroundColor = '';
+                if (selectedColor === 'custom') {
+                    placingObject.style.backgroundColor = customColor;
+                } else {
+                    placingObject.classList.add(`map-planner-object-${selectedColor}`);
+                }
+            }
+
+            function updateMapSelectedObjectsColor() {
+                selectedObjects.forEach(object => {
+                    object.className = 'map-planner-grid-object';
+                    if (object.classList.contains('selected')) {
+                        object.classList.add('selected');
+                    }
+                    object.style.backgroundColor = '';
+                    const objData = objects.find(obj => obj.element === object);
+                    if (objData) {
+                        if (selectedColor === 'custom') {
+                            object.style.backgroundColor = customColor;
+                            objData.color = customColor;
+                        } else {
+                            object.classList.add(`map-planner-object-${selectedColor}`);
+                            objData.color = selectedColor;
+                        }
+                    }
+                });
+            }
+
+            function updateMapPlacingObject() {
+                if (!placingObject) return;
+                objWidth = parseInt(mapObjWidthInput.value);
+                objHeight = parseInt(mapObjHeightInput.value);
+                const label = mapObjLabelInput.value.trim() || `${objWidth}×${objHeight}`;
+                placingObject.textContent = label;
+                const objectWidth = objWidth * CELL_SIZE;
+                const objectHeight = objHeight * CELL_SIZE;
+                placingObject.style.width = `${objectWidth}px`;
+                placingObject.style.height = `${objectHeight}px`;
+            }
+
+            function handleMapGridMouseDown(e) {
+                const cell = e.target.closest('.map-planner-grid-cell');
+                const clickedObject = e.target.closest('.map-planner-grid-object');
+                
+                if ((isPlacing || isSinglePlacement) && cell) {
+                    if (placingObject) {
+                        placingObject.remove();
+                    }
+                    objWidth = parseInt(mapObjWidthInput.value);
+                    objHeight = parseInt(mapObjHeightInput.value);
+                    const row = parseInt(cell.dataset.row);
+                    const col = parseInt(cell.dataset.col);
+                    if (canPlaceMapObject(row, col, objWidth, objHeight)) {
+                        placeMapNewObject(row, col, objWidth, objHeight);
+                        if (isSinglePlacement) {
+                            isSinglePlacement = false;
+                            mapPlaceSingleBtn.classList.remove('active');
+                            if (placingObject) {
+                                placingObject.remove();
+                                placingObject = null;
+                            }
+                        } else if (isPlacing) {
+                            createMapPlacingObject();
+                        }
+                    } else if (isPlacing) {
+                        createMapPlacingObject();
+                    }
+                    return;
+                }
+                
+                if (clickedObject && !isPlacing && !isSinglePlacement) {
+                    e.preventDefault();
+                    if (!e.shiftKey || !isMultiSelect) {
+                        clearMapSelection();
+                    }
+                    selectMapObject(clickedObject, !e.shiftKey);
+                    
+                    if (selectedObjects.length === 1 && !isMultiSelect) {
+                        isDragging = true;
+                        draggedObject = clickedObject;
+                        const objData = objects.find(obj => obj.element === draggedObject);
+                        
+                        if (objData) {
+                            // Calculate the offset within the object where the user clicked
+                            const rect = draggedObject.getBoundingClientRect();
+                            const x = e.clientX - rect.left;
+                            const y = e.clientY - rect.top;
+                            
+                            // Calculate which cell within the object was clicked
+                            dragColOffset = Math.floor(x / CELL_SIZE);
+                            dragRowOffset = Math.floor(y / CELL_SIZE);
+                            
+                            // Store the original position
+                            dragStartRow = objData.row;
+                            dragStartCol = objData.col;
+                            
+                            draggedObject.classList.add('dragging');
+                        }
+                    }
+                    return;
+                }
+                
+                if (!isMultiSelect || !e.shiftKey) {
+                    clearMapSelection();
+                }
+            }
+
+            function handleMapGridMouseMove(e) {
+                if (isPlacing || isSinglePlacement) {
+                    if (!placingObject) return;
+                    const rect = mapGrid.getBoundingClientRect();
+                    const x = (e.clientX - rect.left) / currentZoom;
+                    const y = (e.clientY - rect.top) / currentZoom;
+                    const col = Math.floor(x / CELL_SIZE);
+                    const row = Math.floor(y / CELL_SIZE);
+                    const objectWidth = objWidth * CELL_SIZE;
+                    const objectHeight = objHeight * CELL_SIZE;
+                    const maxLeft = (gridCols - objWidth) * CELL_SIZE;
+                    const maxTop = (gridRows - objHeight) * CELL_SIZE;
+                    const left = Math.min(Math.max(col * CELL_SIZE, 0), maxLeft);
+                    const top = Math.min(Math.max(row * CELL_SIZE, 0), maxTop);
+                    placingObject.style.left = `${left}px`;
+                    placingObject.style.top = `${top}px`;
+                    return;
+                }
+                
+                if (isDragging && draggedObject) {
+                    const rect = mapGrid.getBoundingClientRect();
+                    const x = (e.clientX - rect.left) / currentZoom;
+                    const y = (e.clientY - rect.top) / currentZoom;
+                    
+                    // Calculate the new position accounting for the offset
+                    const col = Math.floor(x / CELL_SIZE) - dragColOffset;
+                    const row = Math.floor(y / CELL_SIZE) - dragRowOffset;
+                    
+                    const objData = objects.find(obj => obj.element === draggedObject);
+                    if (objData) {
+                        const { width, height } = objData;
+                        const maxLeft = (gridCols - width) * CELL_SIZE;
+                        const maxTop = (gridRows - height) * CELL_SIZE;
+                        const left = Math.min(Math.max(col * CELL_SIZE, 0), maxLeft);
+                        const top = Math.min(Math.max(row * CELL_SIZE, 0), maxTop);
+                        
+                        draggedObject.style.left = `${left}px`;
+                        draggedObject.style.top = `${top}px`;
+                        
+                        const isValid = canPlaceMapObject(row, col, width, height, draggedObject);
+                        draggedObject.classList.toggle('valid', isValid);
+                        draggedObject.classList.toggle('invalid', !isValid);
+                    }
+                }
+            }
+
+            function handleMapGridMouseUp(e) {
+                if (isDragging && draggedObject) {
+                    isDragging = false;
+                    const objData = objects.find(obj => obj.element === draggedObject);
+                    if (objData) {
+                        const rect = mapGrid.getBoundingClientRect();
+                        const x = (e.clientX - rect.left) / currentZoom;
+                        const y = (e.clientY - rect.top) / currentZoom;
+                        
+                        // Calculate the new position accounting for the offset
+                        const col = Math.floor(x / CELL_SIZE) - dragColOffset;
+                        const row = Math.floor(y / CELL_SIZE) - dragRowOffset;
+                        
+                        const isValid = canPlaceMapObject(row, col, objData.width, objData.height, draggedObject);
+                        draggedObject.classList.remove('dragging', 'valid', 'invalid');
+                        
+                        if (isValid) {
+                            objData.row = row;
+                            objData.col = col;
+                            positionMapObject(draggedObject, row, col, objData.width, objData.height);
+                            updateMapOccupiedCells();
+                            updateMapSelectionInfo();
+                            updateMapStats();
+                        } else {
+                            positionMapObject(draggedObject, dragStartRow, dragStartCol, objData.width, objData.height);
+                        }
+                    }
+                    draggedObject = null;
+                    dragRowOffset = 0;
+                    dragColOffset = 0;
+                }
+            }
+
+            function clearMapSelection() {
+                selectedObjects.forEach(obj => obj.classList.remove('selected'));
+                selectedObjects = [];
+                updateMapSelectionInfo();
+            }
+
+            function selectMapObject(object, singleSelect = true) {
+                if (singleSelect && selectedObjects.length > 0 && !selectedObjects.includes(object)) {
+                    clearMapSelection();
+                }
+                if (!selectedObjects.includes(object)) {
+                    selectedObjects.push(object);
+                    object.classList.add('selected');
+                    updateMapSelectionInfo();
+                } else if (isMultiSelect) {
+                    const index = selectedObjects.indexOf(object);
+                    if (index !== -1) {
+                        selectedObjects.splice(index, 1);
+                        object.classList.remove('selected');
+                        updateMapSelectionInfo();
+                    }
+                }
+            }
+
+            function updateMapSelectionInfo() {
+                if (selectedObjects.length === 0) {
+                    mapSelectionInfo.textContent = "No object selected";
+                    return;
+                }
+                if (selectedObjects.length > 1) {
+                    mapSelectionInfo.innerHTML = `
+                        <strong>${selectedObjects.length} objects selected</strong><br>
+                        Hold Shift to add/remove from selection
+                    `;
+                    return;
+                }
+                const object = selectedObjects[0];
+                const objData = objects.find(obj => obj.element === object);
+                if (objData) {
+                    mapSelectionInfo.innerHTML = `
+                        <strong>Selected Object:</strong><br>
+                        Position: (${objData.col}, ${objData.row})<br>
+                        Size: ${objData.width}×${objData.height}<br>
+                        Color: ${objData.color}<br>
+                        ${objData.label ? `Label: ${objData.label}` : ''}
+                    `;
+                }
+            }
+
+            function createMapPlacingObject() {
+                if (placingObject) {
+                    placingObject.remove();
+                }
+                placingObject = document.createElement('div');
+                placingObject.classList.add('map-planner-grid-object', 'placing');
+                if (selectedColor === 'custom') {
+                    placingObject.style.backgroundColor = customColor;
+                } else {
+                    placingObject.classList.add(`map-planner-object-${selectedColor}`);
+                }
+                const label = mapObjLabelInput.value.trim() || `${mapObjWidthInput.value}×${mapObjHeightInput.value}`;
+                placingObject.textContent = label;
+                const objectWidth = objWidth * CELL_SIZE;
+                const objectHeight = objHeight * CELL_SIZE;
+                placingObject.style.width = `${objectWidth}px`;
+                placingObject.style.height = `${objectHeight}px`;
+                placingObject.style.left = `-${objectWidth}px`;
+                placingObject.style.top = `-${objectHeight}px`;
+                mapGrid.appendChild(placingObject);
+            }
+
+            function placeMapNewObject(row, col, width, height) {
+                const object = document.createElement('div');
+                object.classList.add('map-planner-grid-object');
+                if (selectedColor === 'custom') {
+                    object.style.backgroundColor = customColor;
+                } else {
+                    object.classList.add(`map-planner-object-${selectedColor}`);
+                }
+                const label = mapObjLabelInput.value.trim() || `${width}×${height}`;
+                object.textContent = label;
+                const objData = {
+                    element: object,
+                    row,
+                    col,
+                    width,
+                    height,
+                    color: selectedColor === 'custom' ? customColor : selectedColor,
+                    label
+                };
+                objects.push(objData);
+                mapGrid.appendChild(object);
+                positionMapObject(object, row, col, width, height);
+                updateMapOccupiedCells();
+                if (placingObject) {
+                    placingObject.remove();
+                    placingObject = null;
+                    if (isPlacing) {
+                        createMapPlacingObject();
+                    }
+                }
+                clearMapSelection();
+                selectMapObject(object);
+                updateMapStats();
+            }
+
+            function positionMapObject(object, row, col, width, height) {
+                const left = col * CELL_SIZE;
+                const top = row * CELL_SIZE;
+                const maxLeft = (gridCols - width) * CELL_SIZE;
+                const maxTop = (gridRows - height) * CELL_SIZE;
+                const clampedLeft = Math.min(left, maxLeft);
+                const clampedTop = Math.min(top, maxTop);
+                object.style.width = `${width * CELL_SIZE}px`;
+                object.style.height = `${height * CELL_SIZE}px`;
+                object.style.left = `${clampedLeft}px`;
+                object.style.top = `${clampedTop}px`;
+            }
+
+            function updateMapOccupiedCells() {
+                document.querySelectorAll('.map-planner-grid-cell.occupied').forEach(cell => {
+                    cell.classList.remove('occupied');
+                });
+                objects.forEach(obj => {
+                    for (let r = obj.row; r < obj.row + obj.height; r++) {
+                        for (let c = obj.col; c < obj.col + obj.width; c++) {
+                            const cell = mapGrid.querySelector(`.map-planner-grid-cell[data-row="${r}"][data-col="${c}"]`);
+                            if (cell) cell.classList.add('occupied');
+                        }
+                    }
+                });
+            }
+
+            function canPlaceMapObject(row, col, width, height, excludeObject = null) {
+                if (row < 0 || col < 0 || row + height > gridRows || col + width > gridCols) {
+                    return false;
+                }
+                for (let r = row; r < row + height; r++) {
+                    for (let c = col; c < col + width; c++) {
+                        const cell = mapGrid.querySelector(`.map-planner-grid-cell[data-row="${r}"][data-col="${c}"]`);
+                        if (cell && cell.classList.contains('occupied')) {
+                            let isExcluded = false;
+                            if (excludeObject) {
+                                const objData = objects.find(obj => obj.element === excludeObject);
+                                if (objData && r >= objData.row && r < objData.row + objData.height &&
+                                    c >= objData.col && c < objData.col + objData.width) {
+                                    isExcluded = true;
+                                }
+                            }
+                            if (!isExcluded) {
+                                return false;
+                            }
+                        }
+                    }
+                }
+                return true;
+            }
+
+            function deleteMapSelectedObjects() {
+                if (selectedObjects.length === 0) return;
+                selectedObjects.forEach(object => {
+                    const index = objects.findIndex(obj => obj.element === object);
+                    if (index !== -1) {
+                        object.remove();
+                        objects.splice(index, 1);
+                    }
+                });
+                updateMapOccupiedCells();
+                selectedObjects = [];
+                updateMapSelectionInfo();
+                updateMapStats();
+            }
+
+            function downloadMapFullGrid() {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                canvas.width = gridCols * CELL_SIZE;
+                canvas.height = gridRows * CELL_SIZE;
+                ctx.fillStyle = '#2c3e50';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#34495e';
+                for (let i = 0; i < gridRows; i++) {
+                    for (let j = 0; j < gridCols; j++) {
+                        ctx.fillRect(j * CELL_SIZE, i * CELL_SIZE, CELL_SIZE - 1, CELL_SIZE - 1);
+                    }
+                }
+                objects.forEach(obj => {
+                    for (let r = obj.row; r < obj.row + obj.height; r++) {
+                        for (let c = obj.col; c < obj.col + obj.width; c++) {
+                            ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
+                            ctx.fillRect(c * CELL_SIZE, r * CELL_SIZE, CELL_SIZE - 1, CELL_SIZE - 1);
+                        }
+                    }
+                });
+                objects.forEach(obj => {
+                    const left = obj.col * CELL_SIZE;
+                    const top = obj.row * CELL_SIZE;
+                    const width = obj.width * CELL_SIZE;
+                    const height = obj.height * CELL_SIZE;
+                    const colorMap = {
+                        'blue': '#3498db',
+                        'red': '#e74c3c',
+                        'green': '#2ecc71',
+                        'purple': '#9b59b6',
+                        'orange': '#e67e22'
+                    };
+                    ctx.fillStyle = obj.color.startsWith('#') ? obj.color : colorMap[obj.color] || '#3498db';
+                    ctx.fillRect(left, top, width, height);
+                    ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+                    ctx.lineWidth = 1;
+                    ctx.strokeRect(left, top, width, height);
+                    ctx.shadowColor = 'rgba(0,0,0,0.3)';
+                    ctx.shadowBlur = 2;
+                    ctx.shadowOffsetX = 0;
+                    ctx.shadowOffsetY = 0;
+                    if (obj.label) {
+                        ctx.font = 'bold 12px Arial';
+                        ctx.fillStyle = 'white';
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        ctx.shadowColor = 'rgba(0,0,0,0.8)';
+                        ctx.shadowBlur = 2;
+                        ctx.fillText(obj.label, left + width/2, top + height/2);
+                        ctx.shadowColor = 'transparent';
+                    }
+                });
+                const link = document.createElement('a');
+                link.download = `grid-map-${new Date().toISOString().slice(0,10)}.png`;
+                link.href = canvas.toDataURL('image/png');
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+
+            function updateMapStats() {
+                mapTotalObjectsSpan.textContent = objects.length;
+                const totalCells = gridCols * gridRows;
+                let occupiedCells = 0;
+                objects.forEach(obj => {
+                    occupiedCells += obj.width * obj.height;
+                });
+                const utilizationPercentage = totalCells > 0 ? Math.round((occupiedCells / totalCells) * 100) : 0;
+                mapGridUtilizationSpan.textContent = `${utilizationPercentage}%`;
+            }
+
+            function saveLayout() {
+                const layoutName = mapLayoutNameInput.value.trim();
+                if (!layoutName) {
+                    alert('Please enter a layout name.');
+                    return;
+                }
+                const layoutData = {
+                    gridCols,
+                    gridRows,
+                    objects: objects.map(obj => ({
+                        row: obj.row,
+                        col: obj.col,
+                        width: obj.width,
+                        height: obj.height,
+                        color: obj.color,
+                        label: obj.label
+                    }))
+                };
+                let layouts;
+                try {
+                    layouts = JSON.parse(localStorage.getItem('mapLayouts') || '{}');
+                } catch (e) {
+                    alert('Error accessing saved layouts. Please clear localStorage and try again.');
+                    return;
+                }
+                layouts[layoutName] = layoutData;
+                try {
+                    localStorage.setItem('mapLayouts', JSON.stringify(layouts));
+                } catch (e) {
+                    alert('Error saving layout: localStorage may be full or inaccessible.');
+                    return;
+                }
+                mapLayoutNameInput.value = '';
+                updateSavedLayouts();
+                alert(`Layout "${layoutName}" saved successfully!`);
+            }
+
+            function loadLayout() {
+                const layoutName = mapLoadLayoutSelect.value;
+                if (!layoutName) {
+                    alert('Please select a layout to load.');
+                    return;
+                }
+                let layouts;
+                try {
+                    layouts = JSON.parse(localStorage.getItem('mapLayouts') || '{}');
+                } catch (e) {
+                    alert('Error accessing saved layouts. Please clear localStorage and try again.');
+                    return;
+                }
+                const layoutData = layouts[layoutName];
+                if (!layoutData) {
+                    alert('Selected layout not found.');
+                    return;
+                }
+                gridCols = layoutData.gridCols;
+                gridRows = layoutData.gridRows;
+                mapGridColsInput.value = gridCols;
+                mapGridRowsInput.value = gridRows;
+                initializeMapGrid();
+                objects = [];
+                selectedObjects = [];
+                layoutData.objects.forEach(obj => {
+                    const object = document.createElement('div');
+                    object.classList.add('map-planner-grid-object');
+                    if (obj.color.startsWith('#')) {
+                        object.style.backgroundColor = obj.color;
+                    } else {
+                        object.classList.add(`map-planner-object-${obj.color}`);
+                    }
+                    object.textContent = obj.label || `${obj.width}×${obj.height}`;
+                    const objData = {
+                        element: object,
+                        row: obj.row,
+                        col: obj.col,
+                        width: obj.width,
+                        height: obj.height,
+                        color: obj.color,
+                        label: obj.label
+                    };
+                    objects.push(objData);
+                    mapGrid.appendChild(object);
+                    positionMapObject(object, obj.row, obj.col, obj.width, obj.height);
+                });
+                updateMapOccupiedCells();
+                updateMapStats();
+                clearMapSelection();
+                alert(`Layout "${layoutName}" loaded successfully!`);
+            }
+
+            function deleteLayout() {
+                const layoutName = mapLoadLayoutSelect.value;
+                if (!layoutName) {
+                    alert('Please select a layout to delete.');
+                    return;
+                }
+                let layouts;
+                try {
+                    layouts = JSON.parse(localStorage.getItem('mapLayouts') || '{}');
+                } catch (e) {
+                    alert('Error accessing saved layouts. Please clear localStorage and try again.');
+                    return;
+                }
+                if (layouts[layoutName]) {
+                    delete layouts[layoutName];
+                    try {
+                        localStorage.setItem('mapLayouts', JSON.stringify(layouts));
+                    } catch (e) {
+                        alert('Error deleting layout: localStorage may be full or inaccessible.');
+                        return;
+                    }
+                    updateSavedLayouts();
+                    alert(`Layout "${layoutName}" deleted successfully!`);
+                } else {
+                    alert('Selected layout not found.');
+                }
+            }
+
+            function updateSavedLayouts() {
+                let layouts;
+                try {
+                    layouts = JSON.parse(localStorage.getItem('mapLayouts') || '{}');
+                } catch (e) {
+                    alert('Error accessing saved layouts. Please clear localStorage and try again.');
+                    return;
+                }
+                mapLoadLayoutSelect.innerHTML = '<option value="">Select a saved layout</option>';
+                Object.keys(layouts).forEach(name => {
+                    const option = document.createElement('option');
+                    option.value = name;
+                    option.textContent = name;
+                    mapLoadLayoutSelect.appendChild(option);
+                });
+            }
+
+            function exportLayouts() {
+                let layouts;
+                try {
+                    layouts = localStorage.getItem('mapLayouts') || '{}';
+                    const parsedLayouts = JSON.parse(layouts);
+                    if (Object.keys(parsedLayouts).length === 0) {
+                        alert('No layouts to export.');
+                        return;
+                    }
+                    const sizeInBytes = new Blob([layouts]).size;
+                    const maxSize = 5 * 1024 * 1024;
+                    if (sizeInBytes > maxSize) {
+                        alert('Layout data is too large to export. Try deleting some layouts.');
+                        return;
+                    }
+                    const blob = new Blob([layouts], { type: 'application/json' });
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = `map-layouts-${new Date().toISOString().slice(0,10)}.json`;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    URL.revokeObjectURL(url);
+                    alert('Layouts exported successfully!');
+                } catch (e) {
+                    alert('Error exporting layouts: Could not access or process saved layouts. Please check localStorage and try again.');
+                    console.error('Export error:', e);
+                }
+            }
+
+            function importLayouts() {
+                const file = mapImportLayoutsInput.files[0];
+                if (!file) {
+                    alert('Please select a JSON file to import.');
+                    return;
+                }
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const importedData = JSON.parse(e.target.result);
+                        if (!isValidLayouts(importedData)) {
+                            alert('Invalid layout file format.');
+                            return;
+                        }
+                        let existingLayouts;
+                        try {
+                            existingLayouts = JSON.parse(localStorage.getItem('mapLayouts') || '{}');
+                        } catch (e) {
+                            alert('Error accessing existing layouts. Please clear localStorage and try again.');
+                            return;
+                        }
+                        const updatedLayouts = { ...existingLayouts, ...importedData };
+                        try {
+                            localStorage.setItem('mapLayouts', JSON.stringify(updatedLayouts));
+                        } catch (e) {
+                            alert('Error saving imported layouts: localStorage may be full or inaccessible.');
+                            return;
+                        }
+                        updateSavedLayouts();
+                        mapImportLayoutsInput.value = '';
+                        alert('Layouts imported successfully!');
+                    } catch (error) {
+                        alert('Error importing layouts: Invalid JSON file or corrupted data.');
+                        console.error('Import error:', error);
+                    }
+                };
+                reader.onerror = function() {
+                    alert('Error reading the file. Please try again.');
+                };
+                reader.readAsText(file);
+            }
+
+            function isValidLayouts(data) {
+                if (typeof data !== 'object' || data === null) return false;
+                return Object.values(data).every(layout => {
+                    return (
+                        layout &&
+                        typeof layout.gridCols === 'number' &&
+                        typeof layout.gridRows === 'number' &&
+                        Array.isArray(layout.objects) &&
+                        layout.objects.every(obj => (
+                            typeof obj.row === 'number' &&
+                            typeof obj.col === 'number' &&
+                            typeof obj.width === 'number' &&
+                            typeof obj.height === 'number' &&
+                            typeof obj.color === 'string' &&
+                            (typeof obj.label === 'string' || obj.label === undefined)
+                        ))
+                    );
+                });
+            }
+        });
+    </script>
+</body>
+</html>
